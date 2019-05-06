@@ -2653,7 +2653,7 @@ try_again:
 		} else {
 			pr_err("Beat count not updating\n");
 			fg_check_ima_error_handling(chip);
-			goto out;
+			return;
 		}
 	} else {
 		chip->last_beat_count = beat_count;
@@ -2662,7 +2662,6 @@ resched:
 	schedule_delayed_work(
 		&chip->check_sanity_work,
 		msecs_to_jiffies(SANITY_CHECK_PERIOD_MS));
-out:
 }
 
 #define SRAM_TIMEOUT_MS			3000
@@ -3064,11 +3063,11 @@ static void slope_limiter_work(struct work_struct *work)
 		else
 			status = HIGH_TEMP_DISCHARGE;
 	} else {
-		goto out;
+		return;
 	}
 
 	if (status == chip->slope_limit_sts)
-		goto out;
+		return;
 
 	val = chip->slope_limit_coeffs[status];
 	val *= MICRO_UNIT;
@@ -3079,14 +3078,13 @@ static void slope_limiter_work(struct work_struct *work)
 	if (rc) {
 		pr_err("Couldn't write to slope_limiter_coeff_reg, rc=%d\n",
 			rc);
-		goto out;
+		return;
 	}
 
 	chip->slope_limit_sts = status;
 	if (fg_debug_mask & FG_STATUS)
 		pr_info("Slope limit sts: %d val: %lld buf[%x %x] written\n",
 			status, val, buf[0], buf[1]);
-out:
 }
 
 static int lookup_ocv_for_soc(struct fg_chip *chip, int soc)
@@ -6540,7 +6538,7 @@ static void check_empty_work(struct work_struct *work)
 	/* handle empty soc based on vbatt-low interrupt */
 	if (chip->use_vbat_low_empty_soc) {
 		if (fg_get_vbatt_status(chip, &vbatt_low_sts))
-			goto out;
+			return;
 
 		msoc = get_monotonic_soc_raw(chip);
 
@@ -6567,8 +6565,6 @@ static void check_empty_work(struct work_struct *work)
 		if (chip->power_supply_registered)
 			power_supply_changed(chip->bms_psy);
 	}
-
-out:
 }
 
 static void batt_profile_init(struct work_struct *work)
