@@ -81,3 +81,7 @@ endif
 obj-$(CONFIG_IPC_ROUTER)	+= ipc_router/
 obj-$(CONFIG_RMNET_DATA) += rmnet_data/
 subdir-ccflags-y += -Os
+
+# optimise for size
+subdir-ccflags-y += $(call cc-option, -g0)
+subdir-ccflags-y += $(call cc-option, -Os)
